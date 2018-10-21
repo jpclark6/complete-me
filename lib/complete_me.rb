@@ -8,19 +8,30 @@ class CompleteMe
     @count = 0
   end
 
-  def insert(word)
-    @count += 1
+  def remove(word)
     node = @node
-    word_length = word.length
-    current_letter = 0
-    word.chars.each do |letter|
-      current_letter += 1
+    word.chars.each_with_index do |letter, i|
+      x = letter.to_sym
+      node = node[x]
+      if (i + 1) == word.length
+        node.delete(:end)
+      end
+    end
+  end
+
+  def insert(word, partial_word = false)
+    @count += 1 unless partial_word
+    node = @node
+    word.chars.each_with_index do |letter, i|
       x = letter.to_sym
       if node.has_key?(x)
         node = node[x]
+        if (i + 1) == word.length && partial_word
+          node[:end] << partial_word
+        end
       else
-        if current_letter == word_length
-          node[x] = {:end=>nil}
+        if (i + 1) == word.length
+          node[x] = {:end=>[]}
         else
           node[x] = {}
         end
@@ -28,6 +39,10 @@ class CompleteMe
       end
     end
     @count
+  end
+
+  def select(partial_word, word)
+    insert(word, partial_word)
   end
 
   def find_possibilities(node, word)
@@ -47,8 +62,8 @@ class CompleteMe
     final_words = []
     possible_words.each do |w, n|
       n.keys.each do |key|
-        if n[key] != nil && n[key].has_key?(:end)
-          final_words << w + key.to_s
+        if n[key].class != Array && n[key].has_key?(:end)
+          final_words << [w + key.to_s, n[key][:end]]
         end
         temp_words << [w + key.to_s, n[key]] unless key == :end
       end
@@ -66,7 +81,20 @@ class CompleteMe
       possible_words = found_words[0]
       final_words = final_words << found_words[1]
     end
-    final_words.flatten
+    cleanup_words(final_words, word)
+  end
+
+  def cleanup_words(final_words, word)
+    final_words = final_words.reject { |a| a.empty? }.flatten(1)
+    final_words.map! do |finals|
+      [finals[1].count(word), finals[0]]
+    end
+    final_words.sort_by! do |finals|
+      -finals[0]
+    end
+    final_words.map! do |finals|
+      finals[1]
+    end
   end
 
   def populate(dictionary)
@@ -80,7 +108,6 @@ class CompleteMe
   def load_dictionary
     dictionary = File.read("/usr/share/dict/words")
     populate(dictionary)
-    nil
   end
 
 end
