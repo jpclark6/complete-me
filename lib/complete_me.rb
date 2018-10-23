@@ -19,6 +19,7 @@ class CompleteMe
     end
   end
 
+
   def insert(word, partial_word = false)
     @count += 1 unless partial_word
     node = @node
@@ -50,8 +51,6 @@ class CompleteMe
       x = letter.to_sym
       if node.has_key?(x)
         node = node[x]
-      else
-        return "Error: no suggestions"
       end
     end
     node
@@ -89,12 +88,8 @@ class CompleteMe
     final_words.map! do |finals|
       [finals[1].count(word), finals[0]]
     end
-    final_words.sort_by! do |finals|
-      -finals[0]
-    end
-    final_words.map! do |finals|
-      finals[1]
-    end
+    final_words.sort_by! { |finals| -finals[0] }
+    final_words.map! { |finals| finals[1] }
   end
 
   def populate(dictionary)

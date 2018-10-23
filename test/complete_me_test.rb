@@ -47,6 +47,7 @@ class CompleteMeTest < Minitest::Test
   end
 
   def test_it_can_select_best_words
+    skip
     complete_me = CompleteMe.new
     complete_me.load_dictionary
     complete_me.select("piz", "pizza")
@@ -58,9 +59,12 @@ class CompleteMeTest < Minitest::Test
 
   def test_it_can_remove_words
     complete_me = CompleteMe.new
-    complete_me.load_dictionary
-    complete_me.remove("trying")
-    expected = ["pize", "pizza", "pizzle", "pizzeria", "pizzicato"]
+    complete_me.insert("pizza")
+    complete_me.insert("pizzeria")
+    complete_me.insert("dog")
+    complete_me.insert("doggie")
+    complete_me.remove("pizzeria")
+    expected = ["pizza"]
     assert_equal expected, complete_me.suggest("piz")
   end
 
